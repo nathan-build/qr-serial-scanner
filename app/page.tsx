@@ -37,6 +37,7 @@ export default function Home() {
   const [pending, setPending] = useState<string | null>(null);
   const [scannerKey, setScannerKey] = useState(0);
   const [justSubmitted, setJustSubmitted] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
 
   useEffect(() => {
     setSerials(loadSerials());
@@ -97,6 +98,19 @@ export default function Home() {
     URL.revokeObjectURL(url);
   };
 
+  const handleClearSession = () => {
+    if (!confirmClear) {
+      setConfirmClear(true);
+      setTimeout(() => setConfirmClear(false), 3000);
+      return;
+    }
+    setSerials([]);
+    saveSerials([]);
+    setConfirmClear(false);
+    setPending(null);
+    setScannerKey((k) => k + 1);
+  };
+
   return (
     <main className="min-h-screen flex flex-col items-center px-4 py-10 gap-8">
       <div className="flex flex-col items-center gap-1">
@@ -146,12 +160,24 @@ export default function Home() {
             <h2 className="font-semibold text-sm text-gray-300">
               Scanned Serials ({serials.length})
             </h2>
-            <button
-              onClick={handleExport}
-              className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              Export CSV
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleExport}
+                className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                Export CSV
+              </button>
+              <button
+                onClick={handleClearSession}
+                className={`text-xs transition-colors font-medium ${
+                  confirmClear
+                    ? "text-red-400 animate-pulse"
+                    : "text-gray-500 hover:text-red-400"
+                }`}
+              >
+                {confirmClear ? "Tap again to confirm" : "Clear session"}
+              </button>
+            </div>
           </div>
           <ul className="flex flex-col gap-2">
             {serials.map((entry, i) => (
